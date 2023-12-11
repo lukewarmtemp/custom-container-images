@@ -1,0 +1,27 @@
+name: Docker Image CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+
+  build:
+
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: cosign-installer
+        uses: sigstore/cosign-installer@v3.1.1
+      - name: Login
+        run: docker login ghcr.io -u ${{ github.repository_owner }} -p ${{ secrets.GH_PAT }}
+      - name: Build container image
+        run: docker build . --tag ghcr.io/lukewarmtemp/fcos-signed:latest
+      - name: Push container image to registry
+        run: docker push ghcr.io/lukewarmtemp/fcos-signed:latest
+      - name: cosign login (rh push-to-registry does not login)
+        run: cosign login ghcr.io -u ${{ github.repository_owner }} -p ${{ secrets.GH_PAT }}
+      - name: sign base container image with sigstore fulcio and github oidc
+        run: cosign sign --yes fcos-signed:latest

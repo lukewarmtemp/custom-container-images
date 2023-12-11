@@ -24,4 +24,4 @@ jobs:
       - name: cosign login (rh push-to-registry does not login)
         run: cosign login ghcr.io -u ${{ github.repository_owner }} -p ${{ secrets.GH_PAT }}
       - name: sign base container image with sigstore fulcio and github oidc
-        run: cosign sign --yes fcos-signed:latest
+        run: cosign sign --yes ghcr.io/lukewarmtemp/fcos-signed:latest

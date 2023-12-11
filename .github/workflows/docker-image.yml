@@ -18,7 +18,7 @@ jobs:
       - name: Login
         run: docker login ghcr.io -u ${{ github.repository_owner }} -p ${{ secrets.GH_PAT }}
       - name: Build container image
-        run: docker build . --tag ghcr.io/lukewarmtemp/fcos-signed:latest
+        run: docker build ./signed-fcos/. --tag ghcr.io/lukewarmtemp/fcos-signed:latest
       - name: Push container image to registry
         run: docker push ghcr.io/lukewarmtemp/fcos-signed:latest
       - name: cosign login (rh push-to-registry does not login)

@@ -17,10 +17,22 @@ jobs:
         uses: sigstore/cosign-installer@v3.1.1
       - name: Login
         run: docker login ghcr.io -u ${{ github.repository_owner }} -p ${{ secrets.GH_PAT }}
-      - name: Build container image
-        run: docker build ./signed-fcos/. --tag ghcr.io/lukewarmtemp/fcos-signed:latest
-      - name: Push container image to registry
-        run: docker push ghcr.io/lukewarmtemp/fcos-signed:latest
+      - name: build base image
+        id: build-base-image
+        uses: redhat-actions/buildah-build@v2
+        with:
+          image: fcos-signed
+          tags: latest
+          containerfiles: ./signed-fcos/Dockerfile
+      - name: push base image
+        id: push-base-image
+        uses: redhat-actions/push-to-registry@v2
+        with:
+          image: ${{ steps.build-base-image.outputs.image }}
+          tags: ${{ steps.build-base-image.outputs.tags }}
+          registry: ghcr.io/${{ github.repository_owner }}
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GH_PAT }}
       - name: cosign login (rh push-to-registry does not login)
         run: cosign login ghcr.io -u ${{ github.repository_owner }} -p ${{ secrets.GH_PAT }}
       - name: sign base container image with sigstore fulcio and github oidc

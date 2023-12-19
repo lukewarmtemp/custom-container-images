@@ -15,8 +15,6 @@ jobs:
       - uses: actions/checkout@v3
       - name: cosign-installer
         uses: sigstore/cosign-installer@v3.1.1
-      - name: Login
-        run: docker login ghcr.io -u ${{ github.repository_owner }} -p ${{ secrets.GH_PAT }}
       - name: build base image
         id: build-base-image
         uses: redhat-actions/buildah-build@v2
@@ -36,4 +34,4 @@ jobs:
       - name: cosign login (rh push-to-registry does not login)
         run: cosign login ghcr.io -u ${{ github.repository_owner }} -p ${{ secrets.GH_PAT }}
       - name: sign base container image with sigstore fulcio and github oidc
-        run: cosign sign --yes ghcr.io/lukewarmtemp/fcos-signed:latest
+        run: cosign sign --yes ghcr.io/${{ github.repository_owner }}/${{ steps.build-base-image.outputs.image }}@${{ steps.push-base-image.outputs.digest }}
